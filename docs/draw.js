@@ -9,6 +9,17 @@ var canvas, ctx,
     strokes = [],
     currentStroke = null;
 
+    document.addEventListener('touchstart', this.touchstart);
+    document.addEventListener('touchmove', this.touchmove);
+    
+    function touchstart(e) {
+        e.preventDefault()
+    }
+    
+    function touchmove(e) {
+        e.preventDefault()
+    }
+
 function redraw () {
     ctx.clearRect(0, 0, canvas.width(), canvas.height());
     ctx.lineCap = 'round';
