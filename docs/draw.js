@@ -90,15 +90,13 @@ function init() {
             mouseEvent(e);
     });
 
-    canvas.addEventListener('touchstart', function() {
+    canvas.touchstart(function() {
         touchEvent();
         event.preventDefault();
-    }, false);
-
-    canvas.addEventListener('touchmove', function(e) {
+    }).touchmove(function(e) {
         touchEvent(e);
         event.preventDefault();
-    }, false);
+    });
 
     $('#save-btn').click(function() {
         var win = window.open();
