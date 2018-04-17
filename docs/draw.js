@@ -9,17 +9,6 @@ var canvas, ctx,
     strokes = [],
     currentStroke = null;
 
-    document.addEventListener('touchstart', this.touchstart);
-    document.addEventListener('touchmove', this.touchmove);
-    
-    function touchstart(e) {
-        e.preventDefault()
-    }
-    
-    function touchmove(e) {
-        e.preventDefault()
-    }
-
 function redraw () {
     ctx.clearRect(0, 0, canvas.width(), canvas.height());
     ctx.lineCap = 'round';
@@ -57,6 +46,27 @@ function init () {
         redraw();
     }
 
+    function touchEvent(e) {
+        if (!e)
+            var e = event;
+    
+        if(e.touches) {
+            if (e.touches.length == 1) { // Only deal with one finger
+                var touch = e.touches[0]; // Get the information for finger #1
+                brush.x = touch.pageX - touch.target.offsetLeft;
+                brush.y = touch.pageY - touch.target.offsetTop;
+            }
+        }
+
+        currentStroke.points.push({
+            x: brush.x,
+            y: brush.y,
+        });
+
+        redraw();
+
+    }
+
     canvas.mousedown(function (e) {
         brush.down = true;
 
@@ -80,6 +90,16 @@ function init () {
             mouseEvent(e);
     });
 
+    canvas.addEventListener('touchstart', function(e){
+        touchEvent(e);
+        event.preventDefault();
+    }, false);
+
+    canvas.addEventListener('touchmove', function(e){
+        touchEvent(e);
+        event.preventDefault();
+    }, false);
+
     $('#save-btn').click(function () {
         var win = window.open();
         win.document.write("<img src='"+canvas[0].toDataURL()+"'/>");
@@ -102,6 +122,7 @@ function init () {
     $('#brush-size').on('input', function () {
         brush.size = this.value;
     });
+    
 }
 
 $(init);
