@@ -9,7 +9,7 @@ var canvas, ctx,
     strokes = [],
     currentStroke = null;
 
-function redraw () {
+function redraw() {
     ctx.clearRect(0, 0, canvas.width(), canvas.height());
     ctx.lineCap = 'round';
     for (var i = 0; i < strokes.length; i++) {
@@ -26,7 +26,7 @@ function redraw () {
     }
 }
 
-function init () {
+function init() {
     canvas = $('#draw');
     canvas.attr({
         width: window.innerWidth,
@@ -34,7 +34,7 @@ function init () {
     });
     ctx = canvas[0].getContext('2d');
 
-    function mouseEvent (e) {
+    function mouseEvent(e) {
         brush.x = e.pageX;
         brush.y = e.pageY;
 
@@ -49,8 +49,8 @@ function init () {
     function touchEvent(e) {
         if (!e)
             var e = event;
-    
-        if(e.touches) {
+
+        if (e.touches) {
             if (e.touches.length == 1) { // Only deal with one finger
                 var touch = e.touches[0]; // Get the information for finger #1
                 brush.x = touch.pageX - touch.target.offsetLeft;
@@ -67,7 +67,7 @@ function init () {
 
     }
 
-    canvas.mousedown(function (e) {
+    canvas.mousedown(function(e) {
         brush.down = true;
 
         currentStroke = {
@@ -79,50 +79,50 @@ function init () {
         strokes.push(currentStroke);
 
         mouseEvent(e);
-    }).mouseup(function (e) {
+    }).mouseup(function(e) {
         brush.down = false;
 
         mouseEvent(e);
 
         currentStroke = null;
-    }).mousemove(function (e) {
+    }).mousemove(function(e) {
         if (brush.down)
             mouseEvent(e);
     });
 
-    canvas.addEventListener('touchstart', function(e){
+    canvas.addEventListener('touchstart', function() {
+        touchEvent();
+        event.preventDefault();
+    }, false);
+
+    canvas.addEventListener('touchmove', function(e) {
         touchEvent(e);
         event.preventDefault();
     }, false);
 
-    canvas.addEventListener('touchmove', function(e){
-        touchEvent(e);
-        event.preventDefault();
-    }, false);
-
-    $('#save-btn').click(function () {
+    $('#save-btn').click(function() {
         var win = window.open();
-        win.document.write("<img src='"+canvas[0].toDataURL()+"'/>");
+        win.document.write("<img src='" + canvas[0].toDataURL() + "'/>");
     });
 
-    $('#undo-btn').click(function () {
+    $('#undo-btn').click(function() {
         strokes.pop();
         redraw();
     });
 
-    $('#clear-btn').click(function () {
+    $('#clear-btn').click(function() {
         strokes = [];
         redraw();
     });
 
-    $('#color-picker').on('input', function () {
+    $('#color-picker').on('input', function() {
         brush.color = this.value;
     });
 
-    $('#brush-size').on('input', function () {
+    $('#brush-size').on('input', function() {
         brush.size = this.value;
     });
-    
+
 }
 
 $(init);
