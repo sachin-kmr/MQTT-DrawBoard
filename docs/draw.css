@@ -7,16 +7,34 @@ body {
     overflow-y: hidden;
 }
 
+.button {
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.colorButton {
+    padding: 2px 2px;
+    cursor: pointer;
+    width: 71.7969px;
+    height: 37px;
+}
+
 .top-bar {
-    display : flex;
+    display: flex;
     flex-direction: row;
     background-color: #3af;
-    border-bottom: 2px solid black;
+    overflow: hidden;
+    float: left;
+    border-bottom: 2px solid silver;
     position: absolute;
     width: 100%;
 }
 
-.top-bar *{
+.top-bar * {
     margin: 5px 15px;
 }
 
