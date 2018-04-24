@@ -52,6 +52,8 @@ function onMessageArrived(message) {
         count += 1;
         for(var i=count; i<data.points.length; i++){
             currentStroke_mqtt.points.push(data.points[i]);
+            currentStroke_mqtt.color = data.color;
+            currentStroke_mqtt.size = data.size;
         }
         redraw_mqtt();
         // redraw();
