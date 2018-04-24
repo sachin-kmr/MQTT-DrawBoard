@@ -10,6 +10,7 @@ var canvas, ctx,
     currentStroke = null;
     strokes_mqtt = [],
     currentStroke_mqtt = null;
+    count=-1;
 
 client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
@@ -18,6 +19,10 @@ client.connect({onSuccess:onConnect});
 
 function onConnect() {
     console.log("Connected from DrawBoard");
+    // client.subscribe("sagar");
+    // message = new Paho.MQTT.Message("Ready");
+    // message.destinationName = "sagar";
+    // client.send(message); 
 }
 
 function onConnectionLost(responseObject) {
@@ -31,7 +36,7 @@ function onMessageArrived(message) {
     msg = message.payloadString;
     data = JSON.parse(msg);
     console.log(data);
-    if(data == 'start'){
+     if(data == 'start'){
         currentStroke_mqtt = {
             color: brush.color,
             size: brush.size,
@@ -41,18 +46,15 @@ function onMessageArrived(message) {
     }
     else if(data == 'stop'){
         currentStroke_mqtt = null;
+        count = -1;
     }
     else{
-        // strokes.push(data);
-        // // console.log("STROKES");
-        // // console.log(strokes);
-        // console.log("STROKES : " + strokes_mqtt)
-        // console.log(strokes_mqtt);
-        // console.log(data.points[0])
-        // currentStroke
-        // // console.log("STROKES : " + strokes);
-        // // console.log("STROKES POINTS : " + strokes.points);
-        redraw();
+        count += 1;
+        for(var i=count; i<data.points.length; i++){
+            currentStroke_mqtt.points.push(data.points[i]);
+        }
+        redraw_mqtt();
+        // redraw();
     }
 }
 
@@ -61,6 +63,23 @@ function redraw() {
     ctx.lineCap = 'round';
     for (var i = 0; i < strokes.length; i++) {
         var s = strokes[i];
+        ctx.strokeStyle = s.color;
+        ctx.lineWidth = s.size;
+        ctx.beginPath();
+        ctx.moveTo(s.points[0].x, s.points[0].y);
+        for (var j = 0; j < s.points.length; j++) {
+            var p = s.points[j];
+            ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+    }
+}
+
+function redraw_mqtt(){
+    ctx.clearRect(0, 0, canvas.width(), canvas.height());
+    ctx.lineCap = 'round';
+    for (var i = 0; i < strokes_mqtt.length; i++) {
+        var s = strokes_mqtt[i];
         ctx.strokeStyle = s.color;
         ctx.lineWidth = s.size;
         ctx.beginPath();
@@ -140,7 +159,7 @@ function init() {
     }).mouseup(function (e) {
         brush.down = false;
 
-        mouseEvent(e);
+        // mouseEvent(e);
 
         currentStroke = null;
 
