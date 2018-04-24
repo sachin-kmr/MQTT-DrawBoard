@@ -8,17 +8,23 @@ var canvas, ctx,
     },
     strokes = [],
     currentStroke = null;
-    strokes_mqtt = [],
+strokes_mqtt = [],
     currentStroke_mqtt = null;
-    count=-1;
+count = -1;
 
 client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
 
-client.connect({onSuccess:onConnect});
+client.connect({ onSuccess: onConnect });
 
 function onConnect() {
     console.log("Connected from DrawBoard");
+    strObj = JSON.stringify('listening');
+    client.subscribe("sagar");
+    message = new Paho.MQTT.Message(strObj);
+    message.destinationName = "sagar";
+    client.send(message);
+    console.log("listening");
     // client.subscribe("sagar");
     // message = new Paho.MQTT.Message("Ready");
     // message.destinationName = "sagar";
@@ -27,30 +33,30 @@ function onConnect() {
 
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
-        console.log("onConnectionLost : "+responseObject.errorMessage);
+        console.log("onConnectionLost : " + responseObject.errorMessage);
     }
 }
 
 function onMessageArrived(message) {
-// console.log("onMessageArrived : "+message.payloadString);
+    // console.log("onMessageArrived : "+message.payloadString);
     msg = message.payloadString;
     data = JSON.parse(msg);
     console.log(data);
-     if(data == 'start'){
+    if (data == 'start') {
         currentStroke_mqtt = {
             color: brush.color,
             size: brush.size,
             points: [],
         };
         strokes_mqtt.push(currentStroke_mqtt);
-    }
-    else if(data == 'stop'){
+    } else if (data == 'stop') {
         currentStroke_mqtt = null;
         count = -1;
-    }
-    else{
+    } else if (data == 'listening') {
+        return;
+    } else {
         count += 1;
-        for(var i=count; i<data.points.length; i++){
+        for (var i = count; i < data.points.length; i++) {
             currentStroke_mqtt.points.push(data.points[i]);
             currentStroke_mqtt.color = data.color;
             currentStroke_mqtt.size = data.size;
@@ -77,7 +83,7 @@ function redraw() {
     }
 }
 
-function redraw_mqtt(){
+function redraw_mqtt() {
     ctx.clearRect(0, 0, canvas.width(), canvas.height());
     ctx.lineCap = 'round';
     for (var i = 0; i < strokes_mqtt.length; i++) {
@@ -102,7 +108,7 @@ function init() {
     });
     ctx = canvas[0].getContext('2d');
 
-    function mouseEvent (e) {
+    function mouseEvent(e) {
         brush.x = e.pageX;
         brush.y = e.pageY;
 
@@ -115,7 +121,7 @@ function init() {
         client.subscribe("sagar");
         message = new Paho.MQTT.Message(strObj);
         message.destinationName = "sagar";
-        client.send(message); 
+        client.send(message);
         // redraw();
     }
 
@@ -140,7 +146,7 @@ function init() {
 
     }
 
-    canvas.mousedown(function (e) {
+    canvas.mousedown(function(e) {
         brush.down = true;
 
         currentStroke = {
@@ -150,18 +156,18 @@ function init() {
         };
 
         strokes.push(currentStroke);
-        
+
         strObj = JSON.stringify('start');
         client.subscribe("sagar");
         message = new Paho.MQTT.Message(strObj);
         message.destinationName = "sagar";
-        client.send(message); 
+        client.send(message);
 
         mouseEvent(e);
-    }).mouseup(function (e) {
+    }).mouseup(function(e) {
         brush.down = false;
 
-        // mouseEvent(e);
+        mouseEvent(e);
 
         currentStroke = null;
 
@@ -169,8 +175,8 @@ function init() {
         client.subscribe("sagar");
         message = new Paho.MQTT.Message(strObj);
         message.destinationName = "sagar";
-        client.send(message); 
-    }).mousemove(function (e) {
+        client.send(message);
+    }).mousemove(function(e) {
         if (brush.down)
             mouseEvent(e);
     });
