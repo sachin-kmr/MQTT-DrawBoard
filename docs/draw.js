@@ -24,7 +24,7 @@ function onConnect() {
     message = new Paho.MQTT.Message(strObj);
     message.destinationName = "sagar";
     client.send(message);
-    console.log("listening");
+    // console.log("listening");
     // client.subscribe("sagar");
     // message = new Paho.MQTT.Message("Ready");
     // message.destinationName = "sagar";
@@ -141,8 +141,13 @@ function init() {
             x: brush.x,
             y: brush.y,
         });
+        strObj = JSON.stringify(currentStroke);
+        client.subscribe("sagar");
+        message = new Paho.MQTT.Message(strObj);
+        message.destinationName = "sagar";
+        client.send(message);
 
-        redraw();
+        // redraw();
 
     }
 
@@ -190,6 +195,12 @@ function init() {
 
         strokes.push(currentStroke);
 
+        strObj = JSON.stringify("start");
+        client.subscribe("sagar");
+        message = new Paho.MQTT.Message(strObj);
+        message.destinationName = "sagar";
+        client.send(message);
+
         touchEvent(e);
         event.preventDefault();
     }, false);
@@ -198,6 +209,19 @@ function init() {
         touchEvent(e);
         event.preventDefault();
     }, false);
+
+    canvas[0].addEventListener('touchend', function(e) {
+        touchEvent(e);
+        event.preventDefault();
+
+        currentStroke = null;
+
+        strObj = JSON.stringify('stop');
+        client.subscribe("sagar");
+        message = new Paho.MQTT.Message(strObj);
+        message.destinationName = "sagar";
+        client.send(message);
+    })
 
     $('#save-btn').click(function() {
         var win = window.open();

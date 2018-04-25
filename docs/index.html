@@ -14,8 +14,8 @@
             // after the decimal.
             return '_' + Math.random().toString(36).substr(2, 9);
         };
-    var client = new Paho.MQTT.Client("broker.hivemq.com", Number(8000), ID());
-    </script>  
+        var client = new Paho.MQTT.Client("192.168.0.101", Number(8083), ID());
+    </script>
     <script src="draw.js"></script>
     <style>
         .button {
