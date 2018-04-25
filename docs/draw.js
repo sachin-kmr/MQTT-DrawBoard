@@ -15,7 +15,7 @@ count = -1;
 client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
 
-client.connect({ onSuccess: onConnect });
+client.connect({ useSSL: true, onSuccess: onConnect });
 
 function onConnect() {
     console.log("Connected from DrawBoard");
