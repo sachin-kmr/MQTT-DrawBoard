@@ -207,6 +207,7 @@ function init() {
     $('#save-btn').click(function() {
         var win = window.open();
         win.document.write("<img src='" + canvas[0].toDataURL("image/png") + "'/>");
+
     });
 
     $('#undo-btn').click(function() {
