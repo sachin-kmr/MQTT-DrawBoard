@@ -17,18 +17,17 @@ client.onMessageArrived = onMessageArrived;
 
 client.connect({ onSuccess: onConnect });
 
-function onConnect() {
-    console.log("Connected from DrawBoard");
-    strObj = JSON.stringify('listening');
+function sendMessage(message) {
+    strObj = JSON.stringify(message);
     client.subscribe("sagar");
     message = new Paho.MQTT.Message(strObj);
     message.destinationName = "sagar";
     client.send(message);
-    // console.log("listening");
-    // client.subscribe("sagar");
-    // message = new Paho.MQTT.Message("Ready");
-    // message.destinationName = "sagar";
-    // client.send(message); 
+}
+
+function onConnect() {
+    console.log("Connected from DrawBoard");
+    sendMessage('listening');
 }
 
 function onConnectionLost(responseObject) {
@@ -54,6 +53,14 @@ function onMessageArrived(message) {
         count = -1;
     } else if (data == 'listening') {
         return;
+    } else if (data == 'clear') {
+        strokes = [];
+        strokes_mqtt = [];
+        redraw_mqtt();
+    } else if (data == 'undo') {
+        strokes.pop();
+        strokes_mqtt.pop();
+        redraw_mqtt();
     } else {
         count += 1;
         for (var i = count; i < data.points.length; i++) {
@@ -62,7 +69,6 @@ function onMessageArrived(message) {
             currentStroke_mqtt.size = data.size;
         }
         redraw_mqtt();
-        // redraw();
     }
 }
 
@@ -117,12 +123,7 @@ function init() {
             y: brush.y,
         });
 
-        strObj = JSON.stringify(currentStroke);
-        client.subscribe("sagar");
-        message = new Paho.MQTT.Message(strObj);
-        message.destinationName = "sagar";
-        client.send(message);
-        // redraw();
+        sendMessage(currentStroke);
     }
 
     function touchEvent(e) {
@@ -141,13 +142,7 @@ function init() {
             x: brush.x,
             y: brush.y,
         });
-        strObj = JSON.stringify(currentStroke);
-        client.subscribe("sagar");
-        message = new Paho.MQTT.Message(strObj);
-        message.destinationName = "sagar";
-        client.send(message);
-
-        // redraw();
+        sendMessage(currentStroke);
 
     }
 
@@ -162,11 +157,7 @@ function init() {
 
         strokes.push(currentStroke);
 
-        strObj = JSON.stringify('start');
-        client.subscribe("sagar");
-        message = new Paho.MQTT.Message(strObj);
-        message.destinationName = "sagar";
-        client.send(message);
+        sendMessage('start');
 
         mouseEvent(e);
     }).mouseup(function(e) {
@@ -176,11 +167,8 @@ function init() {
 
         currentStroke = null;
 
-        strObj = JSON.stringify('stop');
-        client.subscribe("sagar");
-        message = new Paho.MQTT.Message(strObj);
-        message.destinationName = "sagar";
-        client.send(message);
+        sendMessage('stop');
+
     }).mousemove(function(e) {
         if (brush.down)
             mouseEvent(e);
@@ -195,11 +183,7 @@ function init() {
 
         strokes.push(currentStroke);
 
-        strObj = JSON.stringify("start");
-        client.subscribe("sagar");
-        message = new Paho.MQTT.Message(strObj);
-        message.destinationName = "sagar";
-        client.send(message);
+        sendMessage('start');
 
         touchEvent(e);
         event.preventDefault();
@@ -216,26 +200,25 @@ function init() {
 
         currentStroke = null;
 
-        strObj = JSON.stringify('stop');
-        client.subscribe("sagar");
-        message = new Paho.MQTT.Message(strObj);
-        message.destinationName = "sagar";
-        client.send(message);
+        sendMessage('stop');
+
     })
 
     $('#save-btn').click(function() {
         var win = window.open();
-        win.document.write("<img src='" + canvas[0].toDataURL() + "'/>");
+        win.document.write("<img src='" + canvas[0].toDataURL("image/png") + "'/>");
     });
 
     $('#undo-btn').click(function() {
-        strokes.pop();
-        redraw();
+
+        sendMessage('undo');
+
     });
 
     $('#clear-btn').click(function() {
-        strokes = [];
-        redraw();
+
+        sendMessage('clear');
+
     });
 
     $('#color-picker').on('input', function() {
